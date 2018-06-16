@@ -6,11 +6,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
 	"github.com/andig/gosml"
 )
 
 const (
-	PRINT_RANGE = 46
+	PRINTRANGE = 46
 )
 
 func check(e error) {
@@ -42,15 +43,15 @@ func main() {
 			messages, err := sml.FileParse(buf[8 : len(buf)-16])
 
 			for _, msg := range messages {
-				sml.Sml_print_message(msg)
+				sml.PrintMessage(msg)
 			}
 
 			if err != nil {
-				// fmt.Println(err)
+				fmt.Printf("%+v\n", err)
 				goto nextfile
 			}
 		}
-		nextfile:
+	nextfile:
 		// return
 	}
 }

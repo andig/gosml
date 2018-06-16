@@ -1,103 +1,103 @@
 package sml
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 )
 
-type sml_value struct {
-	typ uint8
-	data_bytes sml_octet_string
-	data_boolean bool
-	data_int int64
+type Value struct {
+	Typ         uint8
+	DataBytes   OctetString
+	DataBoolean bool
+	DataInt     int64
 }
 
-func sml_value_parse(buf *sml_buffer) (sml_value, error) {
-/*
-	if (sml_buf_optional_is_skipped(buf)) {
-		return 0;
-	}
+func ValueParse(buf *Buffer) (Value, error) {
+	/*
+		if (BufOptionalIsSkipped(buf)) {
+			return 0;
+		}
 
-	int max = 1;
-	int type = sml_buf_get_next_type(buf);
-	unsigned char byte = sml_buf_get_current_byte(buf);
+		int max = 1;
+		int type = BufGetNextType(buf);
+		unsigned char byte = BufGetCurrentByte(buf);
 
-	sml_value *value = sml_value_init();
-	value->type = type;
+		Value *value = ValueInit();
+		value->type = type;
 
-	switch (type) {
-		case SML_TYPE_OCTET_STRING:
-			value->data.bytes = sml_octet_string_parse(buf);
-			break;
-		case SML_TYPE_BOOLEAN:
-			value->data.boolean = sml_boolean_parse(buf);
-			break;
-		case SML_TYPE_UNSIGNED:
-		case SML_TYPE_INTEGER:
-			// get maximal size, if not all bytes are used (example: only 6 bytes for a u64)
-			while (max < ((byte & SML_LENGTH_FIELD) - 1)) {
-				max <<= 1;
-			}
+		switch (type) {
+			case TYPEOCTETSTRING:
+				value->data.bytes = OctetStringParse(buf);
+				break;
+			case TYPEBOOLEAN:
+				value->data.boolean = BooleanParse(buf);
+				break;
+			case TYPEUNSIGNED:
+			case TYPEINTEGER:
+				// get maximal size, if not all bytes are used (example: only 6 bytes for a u64)
+				while (max < ((byte & LENGTHFIELD) - 1)) {
+					max <<= 1;
+				}
 
-			value->data.uint8 = sml_number_parse(buf, type, max);
-			value->type |= max;
-			break;
-		default:
-			buf->error = 1;
-			break;
-	}
-*/
-	value := sml_value{}
+				value->data.uint8 = NumberParse(buf, type, max);
+				value->type |= max;
+				break;
+			default:
+				buf->error = 1;
+				break;
+		}
+	*/
+	value := Value{}
 
-	if sml_buf_optional_is_skipped(buf) {
+	if BufOptionalIsSkipped(buf) {
 		return value, nil
 	}
 
-	sml_debug(buf, "sml_value_parse")
+	Debug(buf, "ValueParse")
 
-	typefield := sml_buf_get_next_type(buf)
-	b := sml_buf_get_current_byte(buf)
+	typefield := BufGetNextType(buf)
+	b := BufGetCurrentByte(buf)
 
 	max := 1
-	value.typ = typefield
+	value.Typ = typefield
 
 	var err error
-	switch (typefield) {
-		case SML_TYPE_OCTET_STRING:
-			value.data_bytes, err = sml_octet_string_parse(buf)
-			if err != nil {
-				return value, err
-			}
-		case SML_TYPE_BOOLEAN:
-			value.data_boolean, err = sml_boolean_parse(buf)
-			if err != nil {
-				return value, err
-			}
-		case SML_TYPE_UNSIGNED:
-			// get maximal size, if not all bytes are used (example: only 6 bytes for a u64)
-			for max < int((b & SML_LENGTH_FIELD) - 1) {
-				max = max << 1
-			}
+	switch typefield {
+	case TYPEOCTETSTRING:
+		value.DataBytes, err = OctetStringParse(buf)
+		if err != nil {
+			return value, err
+		}
+	case TYPEBOOLEAN:
+		value.DataBoolean, err = BooleanParse(buf)
+		if err != nil {
+			return value, err
+		}
+	case TYPEUNSIGNED:
+		// get maximal size, if not all bytes are used (example: only 6 bytes for a u64)
+		for max < int((b&LENGTHFIELD)-1) {
+			max = max << 1
+		}
 
-			value.data_int, err = sml_number_parse(buf, typefield, max)
-			if err != nil {
-				return value, err
-			}
+		value.DataInt, err = NumberParse(buf, typefield, max)
+		if err != nil {
+			return value, err
+		}
 
-			value.typ = value.typ | uint8(max)
-		case SML_TYPE_INTEGER:
-			// get maximal size, if not all bytes are used (example: only 6 bytes for a u64)
-			for max < int((b & SML_LENGTH_FIELD) - 1) {
-				max = max << 1
-			}
+		value.Typ = value.Typ | uint8(max)
+	case TYPEINTEGER:
+		// get maximal size, if not all bytes are used (example: only 6 bytes for a u64)
+		for max < int((b&LENGTHFIELD)-1) {
+			max = max << 1
+		}
 
-			value.data_int, err = sml_number_parse(buf, typefield, max)
-			if err != nil {
-				return value, err
-			}
+		value.DataInt, err = NumberParse(buf, typefield, max)
+		if err != nil {
+			return value, err
+		}
 
-			value.typ = value.typ | uint8(max)
-		default:
-			return value, fmt.Errorf("sml: Unexpected type %02x", typefield)
+		value.Typ = value.Typ | uint8(max)
+	default:
+		return value, errors.Errorf("Unexpected type %02x", typefield)
 	}
 
 	return value, nil

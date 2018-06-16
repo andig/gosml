@@ -3,89 +3,36 @@ package sml
 import (
 	"bufio"
 	"bytes"
-	"errors"
+
+	"github.com/pkg/errors"
 )
 
 const (
-	SML_MAX_FILE_SIZE = 512
+	MAXFILESIZE = 512
 )
 
 var (
-	escSeq = []byte{0x1b, 0x1b, 0x1b, 0x1b}
-	endSeq = []byte{0x1b, 0x1b, 0x1b, 0x1b, 0x1a}
+	EscSeq = []byte{0x1b, 0x1b, 0x1b, 0x1b}
+	EndSeq = []byte{0x1b, 0x1b, 0x1b, 0x1b, 0x1a}
 )
 
-func sml_read_chunk(r *bufio.Reader, buf []byte) error {
+func ReadChunk(r *bufio.Reader, buf []byte) error {
 	bytes, err := r.Read(buf)
 	if err != nil {
 		return err
 	}
 
 	if bytes < len(buf) {
-		// fmt.Printf("sml_read_chunk %d -> %d\n", len(buf), bytes)
-		return errors.New("sml: premature eof")
+		// fmt.Printf("ReadChunk %d -> %d\n", len(buf), bytes)
+		return errors.New("premature eof")
 	}
 
 	// success - no error
 	return nil
 }
 
-func sml_transport_read(r *bufio.Reader) ([]byte, error) {
-/*
-	unsigned char buf[max_len];
-	memset(buf, 0, max_len);
-	unsigned int len = 0;
-
-	if (max_len < 8) {
-		// prevent buffer overflow
-		fprintf(stderr, "libsml: error: sml_transport_read buffer overflow\n");
-		return 0;
-	}
-
-	while (len < 8) {
-		if (sml_read(fd, &readfds, &(buf[len]), 1) == 0) {
-			return 0;
-		}
-
-		if ((buf[len] == 0x1b && len < 4) || (buf[len] == 0x01 && len >= 4)) {
-			len++;
-		}
-		else {
-			len = 0;
-		}
-	}
-
-	// found start sequence
-	while ((len+8) < max_len) {
-		if (sml_read(fd, &readfds, &(buf[len]), 4) == 0) {
-			return 0;
-		}
-
-		if (memcmp(&buf[len], esc_seq, 4) == 0) {
-			// found esc sequence
-			len += 4;
-			if (sml_read(fd, &readfds, &(buf[len]), 4) == 0) {
-				return 0;
-			}
-
-			if (buf[len] == 0x1a) {
-				// found end sequence
-				len += 4;
-				memcpy(buffer, &(buf[0]), len);
-				return len;
-			}
-			else {
-				// don't read other escaped sequences yet
-				fprintf(stderr,"libsml: error: unrecognized sequence\n");
-				return 0;
-			}
-		}
-		len += 4;
-	}
-
-	return 0;
-*/
-	buf := make([]byte, SML_MAX_FILE_SIZE)
+func TransportRead(r *bufio.Reader) ([]byte, error) {
+	buf := make([]byte, MAXFILESIZE)
 
 	var len int
 	var err error
@@ -104,17 +51,17 @@ func sml_transport_read(r *bufio.Reader) ([]byte, error) {
 	}
 
 	// found start sequence
-	for len+8 < SML_MAX_FILE_SIZE {
-		if err = sml_read_chunk(r, buf[len:len+4]); err != nil {
+	for len+8 < MAXFILESIZE {
+		if err = ReadChunk(r, buf[len:len+4]); err != nil {
 			return nil, err
 		}
 
 		// find escape sequence
-		if bytes.Equal(buf[len:len+4], escSeq) {
+		if bytes.Equal(buf[len:len+4], EscSeq) {
 			len += 4
 
 			// read end sequence
-			if err = sml_read_chunk(r, buf[len:len+4]); err != nil {
+			if err = ReadChunk(r, buf[len:len+4]); err != nil {
 				return nil, err
 			}
 
@@ -124,7 +71,7 @@ func sml_transport_read(r *bufio.Reader) ([]byte, error) {
 				return buf[:len], nil
 			} else {
 				// don't read other escaped sequences yet
-				return nil, errors.New("sml: unrecognized sequence")
+				return nil, errors.New("unrecognized sequence")
 			}
 		}
 
@@ -132,5 +79,5 @@ func sml_transport_read(r *bufio.Reader) ([]byte, error) {
 		len += 4
 	}
 
-	return nil, errors.New("sml: read buffer exceeded")
+	return nil, errors.New("read buffer exceeded")
 }

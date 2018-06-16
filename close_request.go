@@ -1,18 +1,18 @@
 package sml
 
-type sml_close_request struct {
-	global_signature sml_octet_string
+type CloseRequest struct {
+	GlobalSignature OctetString
 }
 
-func sml_close_request_parse(buf *sml_buffer) (sml_close_request, error) {
-	msg := sml_close_request{}
+func CloseRequestParse(buf *Buffer) (CloseRequest, error) {
+	msg := CloseRequest{}
 	var err error
 
-	if err := sml_expect(buf, SML_TYPE_LIST, 1); err != nil {
+	if err := Expect(buf, TYPELIST, 1); err != nil {
 		return msg, err
 	}
 
-	if msg.global_signature, err = sml_octet_string_parse(buf); err != nil {
+	if msg.GlobalSignature, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 

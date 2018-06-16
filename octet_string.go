@@ -1,30 +1,29 @@
 package sml
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 )
 
-type sml_octet_string []byte
+type OctetString []byte
 
-func sml_octet_string_parse(buf *sml_buffer) (sml_octet_string, error) {
-	if skip := sml_buf_optional_is_skipped(buf); skip {
-		return nil, nil;
+func OctetStringParse(buf *Buffer) (OctetString, error) {
+	if skip := BufOptionalIsSkipped(buf); skip {
+		return nil, nil
 	}
 
-	sml_debug(buf, "sml_octet_str_parse")
+	Debug(buf, "OctetStrParse")
 
-	if err := sml_expect_type(buf, SML_TYPE_OCTET_STRING); err != nil {
+	if err := ExpectType(buf, TYPEOCTETSTRING); err != nil {
 		return nil, err
 	}
 
-	length := sml_buf_get_next_length(buf)
+	length := BufGetNextLength(buf)
 	if length < 0 {
-		return nil, fmt.Errorf("sml: Invalid octet string length %d", length)
+		return nil, errors.Errorf("Invalid octet string length %d", length)
 	}
 
-	str := buf.buf[buf.cursor:buf.cursor+length]
-	sml_buf_update_bytes_read(buf, length)
+	str := buf.Buf[buf.Cursor : buf.Cursor+length]
+	BufUpdateBytesRead(buf, length)
 
 	return str, nil
 }
-

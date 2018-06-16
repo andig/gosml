@@ -1,48 +1,43 @@
 package sml
 
-import(
-)
-
-type sml_open_response struct {
-	codepage sml_octet_string
-	client_id sml_octet_string
-	req_file_id sml_octet_string
-	server_id sml_octet_string
-	ref_time sml_time
-	sml_version uint8
+type OpenResponse struct {
+	Codepage  OctetString
+	ClientId  OctetString
+	ReqFileId OctetString
+	ServerId  OctetString
+	RefTime   Time
+	Version   uint8
 }
 
-func sml_open_response_parse(buf *sml_buffer) (sml_open_response, error) {
-	sml_debug(buf, "OPEN_REPONSE")
-
+func OpenResponseParse(buf *Buffer) (OpenResponse, error) {
+	msg := OpenResponse{}
 	var err error
-	msg := sml_open_response{}
 
-	if err := sml_expect(buf, SML_TYPE_LIST, 6); err != nil {
+	if err := Expect(buf, TYPELIST, 6); err != nil {
 		return msg, err
 	}
 
-	if msg.codepage, err = sml_octet_string_parse(buf); err != nil {
+	if msg.Codepage, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.client_id, err = sml_octet_string_parse(buf); err != nil {
+	if msg.ClientId, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.req_file_id, err = sml_octet_string_parse(buf); err != nil {
+	if msg.ReqFileId, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.server_id, err = sml_octet_string_parse(buf); err != nil {
+	if msg.ServerId, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.ref_time, err = sml_time_parse(buf); err != nil {
+	if msg.RefTime, err = TimeParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.sml_version, err = sml_u8_parse(buf); err != nil {
+	if msg.Version, err = U8Parse(buf); err != nil {
 		return msg, err
 	}
 

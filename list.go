@@ -1,73 +1,73 @@
 package sml
 
-type sml_list_entry struct {
-	obj_name sml_octet_string
-	status int64
-	val_time sml_time
-	unit uint8
-	scaler int8
-	value sml_value
-	value_signature sml_octet_string
+type ListEntry struct {
+	ObjName        OctetString
+	Status         int64
+	ValTime        Time
+	Unit           uint8
+	Scaler         int8
+	Value          Value
+	ValueSignature OctetString
 }
 
-func sml_list_entry_parse(buf *sml_buffer) (sml_list_entry, error) {
-	sml_debug(buf, "sml_list_entry_parse")
+func ListEntryParse(buf *Buffer) (ListEntry, error) {
+	Debug(buf, "ListEntryParse")
 
-	elem := sml_list_entry{}
+	elem := ListEntry{}
 	var err error
 
-	if err := sml_expect(buf, SML_TYPE_LIST, 7); err != nil {
+	if err := Expect(buf, TYPELIST, 7); err != nil {
 		return elem, err
 	}
 
-	if elem.obj_name, err = sml_octet_string_parse(buf); err != nil {
+	if elem.ObjName, err = OctetStringParse(buf); err != nil {
 		return elem, err
 	}
 
-	if elem.status, err = sml_status_parse(buf); err != nil {
+	if elem.Status, err = StatusParse(buf); err != nil {
 		return elem, err
 	}
 
-	if elem.val_time, err = sml_time_parse(buf); err != nil {
+	if elem.ValTime, err = TimeParse(buf); err != nil {
 		return elem, err
 	}
 
-	if elem.unit, err = sml_u8_parse(buf); err != nil {
+	if elem.Unit, err = U8Parse(buf); err != nil {
 		return elem, err
 	}
 
-	if elem.scaler, err = sml_i8_parse(buf); err != nil {
+	if elem.Scaler, err = I8Parse(buf); err != nil {
 		return elem, err
 	}
 
-	if elem.value, err = sml_value_parse(buf); err != nil {
+	if elem.Value, err = ValueParse(buf); err != nil {
 		return elem, err
 	}
 
-	if elem.value_signature, err = sml_octet_string_parse(buf); err != nil {
+	if elem.ValueSignature, err = OctetStringParse(buf); err != nil {
 		return elem, err
 	}
 
 	return elem, nil
 }
 
-func sml_list_parse(buf *sml_buffer) ([]sml_list_entry, error) {
-	if sml_buf_optional_is_skipped(buf) {
+func ListParse(buf *Buffer) ([]ListEntry, error) {
+	if BufOptionalIsSkipped(buf) {
 		return nil, nil
 	}
 
-	sml_debug(buf, "sml_list_parse")
+	Debug(buf, "ListParse")
 
-	if err := sml_expect_type(buf, SML_TYPE_LIST); err != nil {
+	if err := ExpectType(buf, TYPELIST); err != nil {
 		return nil, err
 	}
 
-	list := make([]sml_list_entry, 0)
+	list := make([]ListEntry, 0)
 
-	elems := sml_buf_get_next_length(buf)
+	elems := BufGetNextLength(buf)
 
 	for elems > 0 {
-		elem, err := sml_list_entry_parse(buf)
+		elem, err := ListEntryParse(buf)
 		if err != nil {
 			return nil, err
 		}

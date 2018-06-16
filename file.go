@@ -1,20 +1,20 @@
 package sml
 
-func sml_file_parse(bytes []byte) ([]sml_message, error) {
-	buf := &sml_buffer{}
-	buf.buf = make([]byte, SML_MAX_FILE_SIZE)
-	copy(buf.buf, bytes)
+func FileParse(bytes []byte) ([]Message, error) {
+	buf := &Buffer{}
+	buf.Buf = make([]byte, MAXFILESIZE)
+	copy(buf.Buf, bytes)
 
-	messages := make([]sml_message, 0)
+	messages := make([]Message, 0)
 
-	for buf.cursor < len(buf.buf) {
-		if sml_buf_get_current_byte(buf) == SML_MESSAGE_END {
+	for buf.Cursor < len(buf.Buf) {
+		if BufGetCurrentByte(buf) == MESSAGEEND {
 			// reading trailing zeroed bytes
-			sml_buf_update_bytes_read(buf, 1)
-			continue;
+			BufUpdateBytesRead(buf, 1)
+			continue
 		}
 
-		msg, err := sml_message_parse(buf)
+		msg, err := MessageParse(buf)
 		if err != nil {
 			return messages, err
 		}

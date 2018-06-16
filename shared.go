@@ -1,85 +1,85 @@
 package sml
 
 import (
-	"fmt"
+	"github.com/pkg/errors"
 )
 
 const (
-	SML_MESSAGE_END = 0x00
+	MESSAGEEND = 0x00
 
-	SML_TYPE_FIELD   = 0x70
-	SML_LENGTH_FIELD = 0x0F
-	SML_ANOTHER_TL   = 0x80
+	TYPEFIELD   = 0x70
+	LENGTHFIELD = 0x0F
+	ANOTHERTL   = 0x80
 
-	SML_TYPE_OCTET_STRING = 0x00
-	SML_TYPE_BOOLEAN      = 0x40
-	SML_TYPE_INTEGER      = 0x50
-	SML_TYPE_UNSIGNED     = 0x60
-	SML_TYPE_LIST         = 0x70
+	TYPEOCTETSTRING = 0x00
+	TYPEBOOLEAN     = 0x40
+	TYPEINTEGER     = 0x50
+	TYPEUNSIGNED    = 0x60
+	TYPELIST        = 0x70
 
-	SML_OPTIONAL_SKIPPED = 0x01
+	OPTIONALSKIPPED = 0x01
 )
 
-type sml_buffer struct {
-	buf []byte
-	cursor int
+type Buffer struct {
+	Buf    []byte
+	Cursor int
 }
 
-func sml_buf_get_current_byte(buf *sml_buffer) byte {
-	return buf.buf[buf.cursor]
+func BufGetCurrentByte(buf *Buffer) byte {
+	return buf.Buf[buf.Cursor]
 }
 
-func sml_buf_update_bytes_read(buf *sml_buffer, delta int) {
-	buf.cursor += delta
+func BufUpdateBytesRead(buf *Buffer, delta int) {
+	buf.Cursor += delta
 }
 
-func sml_expect(buf *sml_buffer, expected_type uint8, expected_length int) error {
-	if err := sml_expect_type(buf, expected_type); err != nil {
+func Expect(buf *Buffer, expectedType uint8, expectedLength int) error {
+	if err := ExpectType(buf, expectedType); err != nil {
 		return err
 	}
 
-	if length := sml_buf_get_next_length(buf); length != expected_length {
-		return fmt.Errorf("sml: Invalid length: %d (expected %d)", length, expected_length)
+	if length := BufGetNextLength(buf); length != expectedLength {
+		return errors.Errorf("Invalid length: %d (expected %d)", length, expectedLength)
 	}
 
 	return nil
 }
 
-func sml_expect_type(buf *sml_buffer, expected_type uint8) error {
-	if typefield := sml_buf_get_next_type(buf); typefield != expected_type {
-		return fmt.Errorf("sml: Unexpected type %02x (expected %02x)", typefield, expected_type)
+func ExpectType(buf *Buffer, expectedType uint8) error {
+	if typefield := BufGetNextType(buf); typefield != expectedType {
+		return errors.Errorf("Unexpected type %02x (expected %02x)", typefield, expectedType)
 	}
 
 	return nil
 }
 
-func sml_buf_get_next_type(buf *sml_buffer) uint8 {
-	return sml_buf_get_current_byte(buf) & SML_TYPE_FIELD
+func BufGetNextType(buf *Buffer) uint8 {
+	return BufGetCurrentByte(buf) & TYPEFIELD
 }
 
-func sml_buf_get_next_length(buf *sml_buffer) int {
+func BufGetNextLength(buf *Buffer) int {
 	var length uint8
 	var list int
 
-	b := sml_buf_get_current_byte(buf)
+	b := BufGetCurrentByte(buf)
 
 	// not a list
-	if b&SML_TYPE_FIELD != SML_TYPE_LIST {
+	if b&TYPEFIELD != TYPELIST {
 		list = -1
 	}
 
 	for {
-		b := sml_buf_get_current_byte(buf)
+		b := BufGetCurrentByte(buf)
 
 		length = length << 4
-		length = length | (b & SML_LENGTH_FIELD)
+		length = length | (b & LENGTHFIELD)
 
-		if b&SML_ANOTHER_TL != SML_ANOTHER_TL {
+		if b&ANOTHERTL != ANOTHERTL {
 			break
 		}
 
 		// another TL field used
-		sml_buf_update_bytes_read(buf, 1)
+		BufUpdateBytesRead(buf, 1)
 
 		// not a list
 		if list != 0 {
@@ -87,14 +87,14 @@ func sml_buf_get_next_length(buf *sml_buffer) int {
 		}
 	}
 
-	sml_buf_update_bytes_read(buf, 1)
+	BufUpdateBytesRead(buf, 1)
 
 	return int(length) + list
 }
 
-func sml_buf_optional_is_skipped(buf *sml_buffer) bool {
-	if sml_buf_get_current_byte(buf) == SML_OPTIONAL_SKIPPED {
-		sml_buf_update_bytes_read(buf, 1)
+func BufOptionalIsSkipped(buf *Buffer) bool {
+	if BufGetCurrentByte(buf) == OPTIONALSKIPPED {
+		BufUpdateBytesRead(buf, 1)
 		return true
 	}
 
