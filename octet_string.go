@@ -22,7 +22,7 @@ func OctetStringParse(buf *Buffer) (OctetString, error) {
 		return nil, errors.Errorf("Invalid octet string length %d", length)
 	}
 
-	str := buf.Buf[buf.Cursor : buf.Cursor+length]
+	str := buf.Bytes[buf.Cursor : buf.Cursor+length]
 	BufUpdateBytesRead(buf, length)
 
 	return str, nil

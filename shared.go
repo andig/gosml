@@ -21,12 +21,12 @@ const (
 )
 
 type Buffer struct {
-	Buf    []byte
+	Bytes    []byte
 	Cursor int
 }
 
 func BufGetCurrentByte(buf *Buffer) byte {
-	return buf.Buf[buf.Cursor]
+	return buf.Bytes[buf.Cursor]
 }
 
 func BufUpdateBytesRead(buf *Buffer, delta int) {

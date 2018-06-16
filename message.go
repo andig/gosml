@@ -1,8 +1,6 @@
 package sml
 
-import (
-	"fmt"
-)
+import "github.com/pkg/errors"
 
 const (
 	MESSAGEOPENREQUEST              = 0x00000100
@@ -51,7 +49,7 @@ func MessageBodyParse(buf *Buffer) (MessageBody, error) {
 
 	switch body.Tag {
 	case MESSAGEOPENREQUEST:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEOPENREQUEST")
+		return body, errors.Errorf("Unimplemented message type MESSAGEOPENREQUEST")
 		// msgBody->data = OpenRequestParse(buf);
 	case MESSAGEOPENRESPONSE:
 		body.Data, err = OpenResponseParse(buf)
@@ -60,43 +58,41 @@ func MessageBodyParse(buf *Buffer) (MessageBody, error) {
 		body.Data, err = CloseRequestParse(buf)
 		return body, err
 	case MESSAGECLOSERESPONSE:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGECLOSERESPONSE")
+		return body, errors.Errorf("Unimplemented message type MESSAGECLOSERESPONSE")
 		// msgBody->data = CloseResponseParse(buf);
 	case MESSAGEGETPROFILEPACKREQUEST:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEGETPROFILEPACKREQUEST")
+		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILEPACKREQUEST")
 		// msgBody->data = GetProfilePackRequestParse(buf);
 	case MESSAGEGETPROFILEPACKRESPONSE:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEGETPROFILEPACKRESPONSE")
+		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILEPACKRESPONSE")
 		// msgBody->data = GetProfilePackResponseParse(buf);
 	case MESSAGEGETPROFILELISTREQUEST:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEGETPROFILELISTREQUEST")
+		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILELISTREQUEST")
 		// msgBody->data = GetProfileListRequestParse(buf);
 	case MESSAGEGETPROFILELISTRESPONSE:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEGETPROFILELISTRESPONSE")
+		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILELISTRESPONSE")
 		// msgBody->data = GetProfileListResponseParse(buf);
 	case MESSAGEGETPROCPARAMETERREQUEST:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEGETPROCPARAMETERREQUEST")
+		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROCPARAMETERREQUEST")
 		// msgBody->data = GetProcParameterRequestParse(buf);
 	case MESSAGEGETPROCPARAMETERRESPONSE:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEGETPROCPARAMETERRESPONSE")
+		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROCPARAMETERRESPONSE")
 		// msgBody->data = GetProcParameterResponseParse(buf);
 	case MESSAGESETPROCPARAMETERREQUEST:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGESETPROCPARAMETERREQUEST")
+		return body, errors.Errorf("Unimplemented message type MESSAGESETPROCPARAMETERREQUEST")
 		// msgBody->data = SetProcParameterRequestParse(buf);
 	case MESSAGEGETLISTREQUEST:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEGETLISTREQUEST")
+		return body, errors.Errorf("Unimplemented message type MESSAGEGETLISTREQUEST")
 		// msgBody->data = GetListRequestParse(buf);
 	case MESSAGEGETLISTRESPONSE:
 		body.Data, err = GetListResponseParse(buf)
 		return body, err
 	case MESSAGEATTENTIONRESPONSE:
-		return body, fmt.Errorf("sml: Unimplemented message type MESSAGEATTENTIONRESPONSE")
+		return body, errors.Errorf("Unimplemented message type MESSAGEATTENTIONRESPONSE")
 		// msgBody->data = AttentionResponseParse(buf);
-	default:
-		return body, fmt.Errorf("sml: Invalid message type: % x", body.Tag)
 	}
 
-	return body, nil
+	return body, errors.Errorf("Invalid message type: % x", body.Tag)
 }
 
 func MessageParse(buf *Buffer) (Message, error) {

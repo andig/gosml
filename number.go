@@ -74,7 +74,7 @@ func NumberParse(buf *Buffer, numtype uint8, maxSize int) (int64, error) {
 	missingBytes := maxSize - length
 
 	for i := 0; i < length; i++ {
-		np[missingBytes+i] = buf.Buf[buf.Cursor+i]
+		np[missingBytes+i] = buf.Bytes[buf.Cursor+i]
 	}
 
 	negativeInt := typefield == TYPEINTEGER && (typefield&128 > 0)
