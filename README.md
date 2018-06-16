@@ -4,6 +4,29 @@
 
 Go port of [volkszaehler/libsml](https://github.com/volkszaehler/libsml)
 
+## Usage
+
+To install run
+
+    go get github.com/andig/gosml
+
+`gosml` uses `dep` for vendor management. Make sure you have `dep` installed and and run `dep ensure` to fetch vendor dependencies.
+
+To include in your code use
+
+````
+import(
+	"github.com/andig/gosml"
+)
+````
+to import the `sml` package.
+
+## Example
+
+For an example see [cmd/server](https://github.com/andig/gosml/blob/master/cmd/server/main.go) and the [libsml](https://github.com/volkszaehler/libsml) documentation.
+
+## Status
+
 The implementation of this port is not complete and has not been extensively tested.
 
 It is only intended for parsing OBIS codes. This has been validated against
