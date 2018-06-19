@@ -1,0 +1,92 @@
+package sml
+
+type ObjReqEntryList struct {
+	ObjReqEntry objectListEntry
+
+	// list specific
+	struct ObjReqEntryListEntry next
+}
+
+type GetProfilePackRequest struct {
+	ServerID OctetString	// optional
+	Username OctetString 	//  optional
+	Password OctetString 	//  optional
+	WithRawdata Boolean  // optional
+	BeginTime Time		// optional
+	EndTime Time			// optional
+	ParameterTreePath TreePath
+	ObjectList ObjReqEntryList // optional
+	DasDetails Tree		// optional
+}
+
+
+func GetProfilePackRequestParse(Buffer *buf) (GetProfilePackRequest, error){
+	msg := &GetProfilePackRequest{}
+	var err error
+
+	if err := Expect(buf, TYPELIST, 9); err != nil {
+		return msg, err
+	}
+
+	if msg.ServerID, err = OctetStringParse(buf);err != nil {
+		return msg, err
+	}
+
+	if msg.Username, err = OctetStringParse(buf);err != nil {
+		return msg, err
+	}
+
+	if msg.Password, err = OctetStringParse(buf);err != nil {
+		return msg, err
+	}
+
+	if msg.WithRawdata, err = BooleanParse(buf);err != nil {
+		return msg, err
+	}
+
+	if msg.BeginTime, err = TimeParse(buf);err != nil {
+		return msg, err
+	}
+
+	if msg.EndTime, err = TimeParse(buf);err != nil {
+		return msg, err
+	}
+
+	if msg.ParameterTreePath, err = TreePathParse(buf);err != nil {
+		return msg, err
+	}
+
+	if (!BufOptionalIsSkipped(buf)) {
+		if (BufGetNextType(buf) != TYPELIST) {
+			buf.error = 1;
+			goto error;
+		}
+
+		int i, len = BufGetNextLength(buf);
+		ObjReqEntryList *last = 0, *n = 0;
+		for (i = len; i > 0; i--) {
+			n = (ObjReqEntryList *) malloc(sizeof(ObjReqEntryList));
+			*n = ( ObjReqEntryList ) {
+				.objectListEntry = NULL,
+				.next = NULL
+			};
+			if n.objectListEntry, err = ObjReqEntryParse(buf);err != nil {
+				return msg, err
+			}
+
+			if (msg.ObjectList == 0) {
+				msg.ObjectList = n;
+				last = msg.ObjectList;
+			} else {
+				last.next = n;
+				last = n;
+			}
+		}
+	}
+
+	if msg.DasDetails, err = TreeParse(buf);err != nil {
+		return msg, err
+	}
+
+	return msg, nil
+}

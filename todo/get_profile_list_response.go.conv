@@ -1,0 +1,64 @@
+package sml
+
+type GetProfileListResponse struct {
+	ServerID          OctetString
+	ActTime           Time
+	RegPeriod         uint32
+	ParameterTreePath TreePath
+	ValTime           Time
+	Status            uint64
+	PeriodList        Sequence
+	Rawdata           OctetString
+	PeriodSignature   Signature
+}
+
+func PeriodEntryParse2(Buffer *buf) {
+	return PeriodEntryParse(buf)
+}
+
+func GetProfileListResponseParse(Buffer *buf) (GetProfileListResponse, error) {
+	msg := &GetProfileListResponse{}
+	var err error
+
+	if err := Expect(buf, TYPELIST, 9); err != nil {
+		return msg, err
+	}
+
+	if msg.ServerID, err = OctetStringParse(buf); err != nil {
+		return msg, err
+	}
+
+	if msg.ActTime, err = TimeParse(buf); err != nil {
+		return msg, err
+	}
+
+	if msg.RegPeriod, err = Uint32Parse(buf); err != nil {
+		return msg, err
+	}
+
+	if msg.ParameterTreePath, err = TreePathParse(buf); err != nil {
+		return msg, err
+	}
+
+	if msg.ValTime, err = TimeParse(buf); err != nil {
+		return msg, err
+	}
+
+	if msg.Status, err = U64Parse(buf); err != nil {
+		return msg, err
+	}
+
+	if msg.PeriodList, err = SequenceParse(buf, PeriodEntryParse2, PeriodEntryFree2); err != nil {
+		return msg, err
+	}
+
+	if msg.Rawdata, err = OctetStringParse(buf); err != nil {
+		return msg, err
+	}
+
+	if msg.PeriodSignature, err = SignatureParse(buf); err != nil {
+		return msg, err
+	}
+
+	return msg, nil
+}

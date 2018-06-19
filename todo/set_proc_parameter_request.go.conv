@@ -1,27 +1,22 @@
 package sml
 
-type struct {
-	octetString *serverId; // optional
-	octetString *username; // optional
-	octetString *password; // optional
-	TreePath *parameterTreePath;
-	Tree *parameterTree;
-} SetProcParameterRequest;
+type SetProcParameterRequest struct {
+	serverID OctetString, // optional
+	username OctetString, // optional
+	password OctetString, // optional
+	parameterTreePath TreePath,
+	parameterTree Tree,
+}
 
 SetProcParameterRequest *SetProcParameterRequestParse(Buffer *buf) {
-	SetProcParameterRequest *msg = SetProcParameterRequestInit();
+	msg := &GetProcParameterRequest{}
+	var err error
 
-	if (BufGetNextType(buf) != TYPELIST) {
-		buf.error = 1;
-		goto error;
+	if err := Expect(buf, TYPELIST, 5); err != nil {
+		return msg, err
 	}
 
-	if (BufGetNextLength(buf) != 5) {
-		buf.error = 1;
-		goto error;
-	}
-
-	msg.serverId = OctetStringParse(buf);
+	msg.serverID = OctetStringParse(buf);
 	if err != nil {
 		return err
 	}

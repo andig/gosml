@@ -1,0 +1,178 @@
+package sml
+
+type GetProfilePackResponse struct {
+	ServerID OctetString
+	ActTime Time // specified by germans (current time was meant) ;)
+	RegPeriod uint32
+	ParameterTreePath TreePath
+	HeaderList Sequence 			// list of ProfObjHeaderEntry
+	PeriodList Sequence			// list of ProfObjPeriodEntry
+	Rawdata OctetString  			// optional
+	ProfileSignature Signature 	// optional
+}
+
+type ProfObjHeaderEntry struct {
+	objName OctetString
+	unit Unit
+	scaler int8
+}
+
+type ProfObjPeriodEntry struct {
+	valTime Time
+	status uint64
+	valueList Sequence
+	periodSignature Signature
+}
+
+type ValueEntry struct {
+	value Value
+	valueSignature Signature
+}
+
+static void * ProfObjHeaderEntryParse(Buffer *buf);
+static void * ValueEntryParse(Buffer *buf);
+
+static void * ProfObjPeriodEntryParse(Buffer *buf) {
+	ProfObjPeriodEntry *entry = ProfObjPeriodEntryInit();
+
+	msg := &GetProcParameterRequest{}
+	var err error
+
+	if err := Expect(buf, TYPELIST, 4); err != nil {
+		return msg, err
+	}
+
+	entry.valTime = TimeParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	entry.status = U64Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+	entry.valueList = SequenceParse(buf, ValueEntryParse, ValueEntryFree);
+	if (BufHasErrors(buf)) goto error;
+	entry.periodSignature = SignatureParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	return entry;
+
+error:
+	buf.error = 1;
+	ProfObjPeriodEntryFree(entry);
+	return 0;
+}
+
+
+static void * ValueEntryParse(Buffer *buf) {
+	ValueEntry *entry = ValueEntryInit();
+
+	if (BufGetNextType(buf) != TYPELIST) {
+		buf.error = 1;
+		goto error;
+	}
+
+	if (BufGetNextLength(buf) != 2) {
+		buf.error = 1;
+		goto error;
+	}
+
+	entry.value = ValueParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	entry.valueSignature = SignatureParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	return entry;
+
+error:
+	buf.error = 1;
+	ValueEntryFree(entry);
+	return 0;
+}
+
+
+// GetProfilePackResponse;
+
+
+GetProfilePackResponse *GetProfilePackResponseParse(Buffer *buf){
+	GetProfilePackResponse *msg = GetProfilePackResponseInit();
+
+	if (BufGetNextType(buf) != TYPELIST) {
+		buf.error = 1;
+		goto error;
+	}
+
+	if (BufGetNextLength(buf) != 8) {
+		buf.error = 1;
+		goto error;
+	}
+
+	msg.ServerID = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	msg.ActTime = TimeParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	msg.RegPeriod = U32Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	msg.ParameterTreePath = TreePathParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	msg.HeaderList = SequenceParse(buf, ProfObjHeaderEntryParse, ProfObjHeaderEntryFree);
+	if (BufHasErrors(buf)) goto error;
+
+	msg.PeriodList = SequenceParse(buf, ProfObjPeriodEntryParse, ProfObjPeriodEntryFree);
+	if (BufHasErrors(buf)) goto error;
+
+	msg.Rawdata = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	msg.ProfileSignature = SignatureParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	return msg;
+
+error:
+	buf.error = 1;
+	GetProfilePackResponseFree(msg);
+	return 0;
+}
+
+
+static void * ProfObjHeaderEntryParse(Buffer *buf) {
+	ProfObjHeaderEntry *entry = ProfObjHeaderEntryInit();
+
+	if (BufGetNextType(buf) != TYPELIST) {
+		buf.error = 1;
+		goto error;
+	}
+
+	if (BufGetNextLength(buf) != 3) {
+		buf.error = 1;
+		goto error;
+	}
+
+	entry.objName = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	entry.unit = UnitParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	entry.scaler = I8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	return entry;
+error:
+	buf.error = 1;
+	ProfObjHeaderEntryFree(entry);
+	return 0;
+}
+
+ProfObjHeaderEntry * ProfObjHeaderEntryParse( Buffer * buf ) {
+	return ProfObjHeaderEntryParse( buf );
+}
+
+ProfObjPeriodEntry * ProfObjPeriodEntryParse( Buffer * buf ) {
+	return ProfObjPeriodEntryParse( buf );
+}
+
+// ValueEntry;
+
+ValueEntry * ValueEntryParse( Buffer * buf ) {
+	return ValueEntryParse( buf );
+}

@@ -1,0 +1,332 @@
+package sml
+
+
+// what a messy tupel ...
+type TupelEntry struct {
+	serverId OctetString,
+	secIndex Time,
+	status uint64,
+
+	unitPA Unit,
+	scalerPA int8,
+	valuePA int64,
+
+	unitR1 Unit,
+	scalerR1 int8,
+	valueR1 int64,
+
+	unitR4 Unit,
+	scalerR4 int8,
+	valueR4 int64,
+ 	signaturePAR1R4 OctetString,
+
+	unitMA Unit,
+	scalerMA int8,
+	valueMA int64,
+
+	unitR2 Unit,
+	scalerR2 int8,
+	valueR2 int64,
+
+	unitR3 Unit,
+	scalerR3 int8,
+	valueR3 int64,
+
+	signatureMAR2R3 OctetString,
+}
+
+type PeriodEntry struct {
+	objName OctetString,
+	unit Unit,
+	scaler int8,
+	value Value,
+	valueSignature OctetString,
+}
+
+type ProcParValue struct {
+	uint8 tag,
+	union {
+		Value value,
+		PeriodEntry periodEntry,
+		TupelEntry tupelEntry,
+		Time time,
+	} data;
+}
+
+type Tree struct {
+	OctetString parameterName,
+	ProcParValue parameterValue, // optional
+	struct sTree childList, // optional
+
+	int childListLen;
+}
+
+type TreePath struct {
+	int pathEntriesLen,
+	OctetString pathEntries,
+}
+
+
+
+TreePath *TreePathParse(Buffer *buf) {
+	if (BufOptionalIsSkipped(buf)) {
+		return 0;
+	}
+
+	TreePath *treePath = TreePathInit();
+
+	if (BufGetNextType(buf) != TYPELIST) {
+		buf.error = 1;
+		return 0;
+	}
+
+	OctetString *s;
+	int elems;
+	for (elems = BufGetNextLength(buf); elems > 0; elems--) {
+		s = OctetStringParse(buf);
+		if (BufHasErrors(buf)) goto error;
+		if (s) {
+			TreePathAddPathEntry(treePath, s);
+		}
+	}
+
+	return treePath;
+
+error:
+	buf.error = 1;
+	TreePathFree(treePath);
+	return 0;
+}
+
+void TreePathAddPathEntry(TreePath *treePath, OctetString *entry) {
+	treePath.pathEntriesLen++;
+	treePath.pathEntries = (OctetString **) realloc(treePath.pathEntries,
+		sizeof(OctetString *) * treePath.pathEntriesLen);
+
+	treePath.pathEntries[treePath.pathEntriesLen - 1] = entry;
+}
+
+Tree *TreeParse(Buffer *buf) {
+	if (BufOptionalIsSkipped(buf)) {
+		return 0;
+	}
+
+	Tree *tree = TreeInit();
+
+	if (BufGetNextType(buf) != TYPELIST) {
+		buf.error = 1;
+		goto error;
+	}
+
+	if (BufGetNextLength(buf) != 3) {
+		buf.error = 1;
+		goto error;
+	}
+
+	tree.parameterName = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tree.parameterValue = ProcParValueParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	if (!BufOptionalIsSkipped(buf)) {
+		if (BufGetNextType(buf) != TYPELIST) {
+			buf.error = 1;
+			goto error;
+		}
+
+		Tree *c;
+		int elems;
+		for (elems = BufGetNextLength(buf); elems > 0; elems--) {
+			c = TreeParse(buf);
+			if (BufHasErrors(buf)) goto error;
+			if (c) {
+				TreeAddTree(tree, c);
+			}
+		}
+	}
+
+	return tree;
+
+error:
+	TreeFree(tree);
+	return 0;
+}
+
+void TreeAddTree(Tree *baseTree, Tree *tree) {
+	baseTree.childListLen++;
+	baseTree.childList = (Tree **) realloc(baseTree.childList,
+		sizeof(Tree *) * baseTree.childListLen);
+	baseTree.childList[baseTree.childListLen - 1] = tree;
+}
+
+
+ProcParValue *ProcParValueParse(Buffer *buf) {
+	if (BufOptionalIsSkipped(buf)) {
+		return 0;
+	}
+
+	ProcParValue *ppv = ProcParValueInit();
+
+	if (BufGetNextType(buf) != TYPELIST) {
+		buf.error = 1;
+		goto error;
+	}
+
+	if (BufGetNextLength(buf) != 2) {
+		buf.error = 1;
+		goto error;
+	}
+
+	ppv.tag = U8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	switch (*(ppv.tag)) {
+		case PROCPARVALUETAGVALUE:
+			ppv.data.value = ValueParse(buf);
+			break;
+		case PROCPARVALUETAGPERIODENTRY:
+			ppv.data.periodEntry = PeriodEntryParse(buf);
+			break;
+		case PROCPARVALUETAGTUPELENTRY:
+			ppv.data.tupelEntry = TupelEntryParse(buf);
+			break;
+		case PROCPARVALUETAGTIME:
+			ppv.data.time = TimeParse(buf);
+			break;
+		default:
+			buf.error = 1;
+			goto error;
+	}
+
+	return ppv;
+
+error:
+	ProcParValueFree(ppv);
+	return 0;
+}
+
+
+TupelEntry *TupelEntryParse(Buffer *buf) {
+	if (BufOptionalIsSkipped(buf)) {
+		return 0;
+	}
+
+	TupelEntry *tupel = TupelEntryInit();
+
+	if (BufGetNextType(buf) != TYPELIST) {
+		buf.error = 1;
+		goto error;
+	}
+
+	if (BufGetNextLength(buf) != 23) {
+		buf.error = 1;
+		goto error;
+	}
+
+	tupel.serverId = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.secIndex = TimeParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.status = U64Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tupel.unitPA = UnitParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.scalerPA = I8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.valuePA = I64Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tupel.unitR1 = UnitParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.scalerR1 = I8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.valueR1 = I64Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tupel.unitR4 = UnitParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.scalerR4 = I8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.valueR4 = I64Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tupel.signaturePAR1R4 = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tupel.unitMA = UnitParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.scalerMA = I8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.valueMA = I64Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tupel.unitR2 = UnitParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.scalerR2 = I8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.valueR2 = I64Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tupel.unitR3 = UnitParse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.scalerR3 = I8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+	tupel.valueR3 = I64Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	tupel.signatureMAR2R3 = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	return tupel;
+
+error:
+	TupelEntryFree(tupel);
+	return 0;
+}
+
+
+
+static void * PeriodEntryParse(Buffer *buf) {
+	if (BufOptionalIsSkipped(buf)) {
+		return 0;
+	}
+
+	PeriodEntry *period = PeriodEntryInit();
+
+	if (BufGetNextType(buf) != TYPELIST) {
+		buf.error = 1;
+		goto error;
+	}
+
+	if (BufGetNextLength(buf) != 5) {
+		buf.error = 1;
+		goto error;
+	}
+
+	period.objName = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	period.unit = UnitParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	period.scaler = I8Parse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	period.value = ValueParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	period.valueSignature = OctetStringParse(buf);
+	if (BufHasErrors(buf)) goto error;
+
+	return period;
+
+error:
+	PeriodEntryFree(period);
+	return 0;
+}
+
+PeriodEntry * PeriodEntryParse( Buffer * buf ) {
+	return PeriodEntryParse( buf );
+}
