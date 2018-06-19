@@ -1,6 +1,10 @@
 package sml
 
-import "github.com/pkg/errors"
+import (
+	"fmt"
+
+	"github.com/pkg/errors"
+)
 
 const (
 	MESSAGEOPENREQUEST              = 0x00000100
@@ -21,8 +25,8 @@ const (
 )
 
 type Message struct {
-	TransactionId OctetString
-	GroupId       uint8
+	TransactionID OctetString
+	GroupID       uint8
 	AbortOnError  uint8
 	MessageBody   MessageBody
 	Crc           uint16
@@ -49,8 +53,8 @@ func MessageBodyParse(buf *Buffer) (MessageBody, error) {
 
 	switch body.Tag {
 	case MESSAGEOPENREQUEST:
-		return body, errors.Errorf("Unimplemented message type MESSAGEOPENREQUEST")
-		// msgBody->data = OpenRequestParse(buf);
+		body.Data, err = OpenRequestParse(buf)
+		return body, err
 	case MESSAGEOPENRESPONSE:
 		body.Data, err = OpenResponseParse(buf)
 		return body, err
@@ -58,8 +62,8 @@ func MessageBodyParse(buf *Buffer) (MessageBody, error) {
 		body.Data, err = CloseRequestParse(buf)
 		return body, err
 	case MESSAGECLOSERESPONSE:
-		return body, errors.Errorf("Unimplemented message type MESSAGECLOSERESPONSE")
-		// msgBody->data = CloseResponseParse(buf);
+		body.Data, err = CloseResponseParse(buf)
+		return body, err
 	case MESSAGEGETPROFILEPACKREQUEST:
 		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILEPACKREQUEST")
 		// msgBody->data = GetProfilePackRequestParse(buf);
@@ -82,8 +86,8 @@ func MessageBodyParse(buf *Buffer) (MessageBody, error) {
 		return body, errors.Errorf("Unimplemented message type MESSAGESETPROCPARAMETERREQUEST")
 		// msgBody->data = SetProcParameterRequestParse(buf);
 	case MESSAGEGETLISTREQUEST:
-		return body, errors.Errorf("Unimplemented message type MESSAGEGETLISTREQUEST")
-		// msgBody->data = GetListRequestParse(buf);
+		body.Data, err = GetListRequestParse(buf)
+		return body, err
 	case MESSAGEGETLISTRESPONSE:
 		body.Data, err = GetListResponseParse(buf)
 		return body, err
@@ -95,21 +99,23 @@ func MessageBodyParse(buf *Buffer) (MessageBody, error) {
 	return body, errors.Errorf("Invalid message type: % x", body.Tag)
 }
 
-func MessageParse(buf *Buffer) (Message, error) {
+func MessageParse(buf *Buffer, validate ...bool) (Message, error) {
 	Debug(buf, "MessageParse")
 
 	msg := Message{}
 	var err error
 
+	crcStart := buf.Cursor
+
 	if err := Expect(buf, TYPELIST, 6); err != nil {
 		return msg, err
 	}
 
-	if msg.TransactionId, err = OctetStringParse(buf); err != nil {
+	if msg.TransactionID, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.GroupId, err = U8Parse(buf); err != nil {
+	if msg.GroupID, err = U8Parse(buf); err != nil {
 		return msg, err
 	}
 
@@ -121,8 +127,21 @@ func MessageParse(buf *Buffer) (Message, error) {
 		return msg, err
 	}
 
+	crcEnd := buf.Cursor
+
 	if msg.Crc, err = U16Parse(buf); err != nil {
 		return msg, err
+	}
+
+	if len(validate) > 0 && validate[0] {
+		fmt.Println(buf.Cursor)
+		crc := Crc16Calculate(buf.Bytes[crcStart:crcEnd], crcEnd-crcStart)
+		fmt.Printf("%04x-%04x\n", crc, msg.Crc)
+
+		if crc == msg.Crc {
+			err := errors.New("Crc error")
+			return msg, err
+		}
 	}
 
 	if BufGetCurrentByte(buf) == MESSAGEEND {

@@ -97,7 +97,7 @@ func main() {
 			}
 
 			if err != nil {
-				// fmt.Printf("%+v\n", err)
+				fmt.Printf("%+v\n", err)
 				goto nextfile
 			}
 		}

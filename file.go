@@ -14,7 +14,7 @@ func FileParse(bytes []byte) ([]Message, error) {
 			continue
 		}
 
-		msg, err := MessageParse(buf)
+		msg, err := MessageParse(buf, true)
 		if err != nil {
 			return messages, err
 		}
