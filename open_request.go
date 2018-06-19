@@ -10,39 +10,39 @@ type OpenRequest struct {
 	Version   uint8       // optional
 }
 
-func OpenRequestParse(buf Buffer) (OpenRequest, error) {
-	msg := &OpenRequest{}
+func OpenRequestParse(buf *Buffer) (OpenRequest, error) {
+	msg := OpenRequest{}
 	var err error
 
 	if err := Expect(buf, TYPELIST, 7); err != nil {
 		return msg, err
 	}
 
-	if msg.Codepage = OctetStringParse(buf); err != nil {
+	if msg.Codepage, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.ClientID = OctetStringParse(buf); err != nil {
+	if msg.ClientID, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.ReqFileID = OctetStringParse(buf); err != nil {
+	if msg.ReqFileID, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.ServerID = OctetStringParse(buf); err != nil {
+	if msg.ServerID, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.Username = OctetStringParse(buf); err != nil {
+	if msg.Username, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.Password = OctetStringParse(buf); err != nil {
+	if msg.Password, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.Version = U8Parse(buf); err != nil {
+	if msg.Version, err = U8Parse(buf); err != nil {
 		return msg, err
 	}
 

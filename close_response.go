@@ -2,8 +2,9 @@ package sml
 
 type CloseResponse CloseRequest
 
-func CloseResponseParse(Buffer *buf) (CloseResponse, error) {
-	msg = &CloseResponse{}
+func CloseResponseParse(buf *Buffer) (CloseResponse, error) {
+	msg := CloseResponse{}
+	var err error
 
 	if err := Expect(buf, TYPELIST, 1); err != nil {
 		return msg, err

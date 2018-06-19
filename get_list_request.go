@@ -8,8 +8,8 @@ type GetListRequest struct {
 	ListName OctetString // optional
 }
 
-func GetListRequestParse(buf Buffer) (GetListRequest, error) {
-	msg := &GetListRequest{}
+func GetListRequestParse(buf *Buffer) (GetListRequest, error) {
+	msg := GetListRequest{}
 	var err error
 
 	if err := Expect(buf, TYPELIST, 5); err != nil {
