@@ -69,10 +69,10 @@ func TransportRead(r *bufio.Reader) ([]byte, error) {
 				// found end sequence
 				len += 4
 				return buf[:len], nil
-			} else {
-				// don't read other escaped sequences yet
-				return nil, errors.New("unrecognized sequence")
 			}
+
+			// don't read other escaped sequences yet
+			return nil, errors.New("unrecognized sequence")
 		}
 
 		// continue reading

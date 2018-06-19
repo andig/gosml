@@ -11,11 +11,7 @@ func BooleanParse(buf *Buffer) (bool, error) {
 		return false, err
 	}
 
-	if BufGetCurrentByte(buf) > 0 {
-		BufUpdateBytesRead(buf, 1)
-		return true, nil
-	} else {
-		BufUpdateBytesRead(buf, 1)
-		return false, nil
-	}
+	b := BufGetCurrentByte(buf)
+	BufUpdateBytesRead(buf, 1)
+	return b > 0, nil
 }

@@ -2,9 +2,9 @@ package sml
 
 type OpenResponse struct {
 	Codepage  OctetString
-	ClientId  OctetString
-	ReqFileId OctetString
-	ServerId  OctetString
+	ClientID  OctetString
+	ReqFileID OctetString
+	ServerID  OctetString
 	RefTime   Time
 	Version   uint8
 }
@@ -21,15 +21,15 @@ func OpenResponseParse(buf *Buffer) (OpenResponse, error) {
 		return msg, err
 	}
 
-	if msg.ClientId, err = OctetStringParse(buf); err != nil {
+	if msg.ClientID, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.ReqFileId, err = OctetStringParse(buf); err != nil {
+	if msg.ReqFileID, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 
-	if msg.ServerId, err = OctetStringParse(buf); err != nil {
+	if msg.ServerID, err = OctetStringParse(buf); err != nil {
 		return msg, err
 	}
 

@@ -1,8 +1,8 @@
 package sml
 
 type GetListResponse struct {
-	ClientId       OctetString
-	ServerId       OctetString
+	ClientID       OctetString
+	ServerID       OctetString
 	ListName       OctetString
 	ActSensorTime  Time
 	ValList        []ListEntry
@@ -18,11 +18,11 @@ func GetListResponseParse(buf *Buffer) (GetListResponse, error) {
 		return list, err
 	}
 
-	if list.ClientId, err = OctetStringParse(buf); err != nil {
+	if list.ClientID, err = OctetStringParse(buf); err != nil {
 		return list, err
 	}
 
-	if list.ServerId, err = OctetStringParse(buf); err != nil {
+	if list.ServerID, err = OctetStringParse(buf); err != nil {
 		return list, err
 	}
 
