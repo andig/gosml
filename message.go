@@ -1,7 +1,7 @@
 package sml
 
 import (
-	"fmt"
+//	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -134,11 +134,11 @@ func MessageParse(buf *Buffer, validate ...bool) (Message, error) {
 	}
 
 	if len(validate) > 0 && validate[0] {
-		fmt.Println(buf.Cursor)
+//		fmt.Println(buf.Cursor)
 		crc := Crc16Calculate(buf.Bytes[crcStart:crcEnd], crcEnd-crcStart)
-		fmt.Printf("%04x-%04x\n", crc, msg.Crc)
+//		fmt.Printf("%04x-%04x\n", crc, msg.Crc)
 
-		if crc == msg.Crc {
+		if crc != msg.Crc {
 			err := errors.New("Crc error")
 			return msg, err
 		}
