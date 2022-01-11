@@ -1,8 +1,6 @@
 package sml
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 const (
 	MESSAGEEND = 0x00
@@ -21,7 +19,7 @@ const (
 )
 
 type Buffer struct {
-	Bytes    []byte
+	Bytes  []byte
 	Cursor int
 }
 
@@ -39,7 +37,7 @@ func Expect(buf *Buffer, expectedType uint8, expectedLength int) error {
 	}
 
 	if length := BufGetNextLength(buf); length != expectedLength {
-		return errors.Errorf("Invalid length: %d (expected %d)", length, expectedLength)
+		return fmt.Errorf("Invalid length: %d (expected %d)", length, expectedLength)
 	}
 
 	return nil
@@ -47,7 +45,7 @@ func Expect(buf *Buffer, expectedType uint8, expectedLength int) error {
 
 func ExpectType(buf *Buffer, expectedType uint8) error {
 	if typefield := BufGetNextType(buf); typefield != expectedType {
-		return errors.Errorf("Unexpected type %02x (expected %02x)", typefield, expectedType)
+		return fmt.Errorf("Unexpected type %02x (expected %02x)", typefield, expectedType)
 	}
 
 	return nil

@@ -2,8 +2,7 @@ package sml
 
 import (
 	"encoding/binary"
-
-	"github.com/pkg/errors"
+	"fmt"
 )
 
 const (
@@ -62,12 +61,12 @@ func NumberParse(buf *Buffer, numtype uint8, maxSize int) (int64, error) {
 
 	typefield := BufGetNextType(buf)
 	if typefield != numtype {
-		return 0, errors.Errorf("Unexpected type %02x (expected %02x)", typefield, numtype)
+		return 0, fmt.Errorf("Unexpected type %02x (expected %02x)", typefield, numtype)
 	}
 
 	length := BufGetNextLength(buf)
 	if length < 0 || length > maxSize {
-		return 0, errors.Errorf("Invalid length: %d", length)
+		return 0, fmt.Errorf("Invalid length: %d", length)
 	}
 
 	np := make([]byte, maxSize)
@@ -95,7 +94,7 @@ func NumberParse(buf *Buffer, numtype uint8, maxSize int) (int64, error) {
 	case TYPENUMBER_64:
 		num = int64(binary.BigEndian.Uint64(np))
 	default:
-		return num, errors.Errorf("Invalid number type size %02x", maxSize)
+		return num, fmt.Errorf("Invalid number type size %02x", maxSize)
 	}
 
 	BufUpdateBytesRead(buf, length)

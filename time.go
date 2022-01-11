@@ -1,8 +1,6 @@
 package sml
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 type Time uint32
 
@@ -94,7 +92,7 @@ func TimeParse(buf *Buffer) (Time, error) {
 			return 0, err
 		}
 	default:
-		return 0, errors.Errorf("Invalid time format %02x", typefield)
+		return 0, fmt.Errorf("Invalid time format %02x", typefield)
 	}
 
 	return Time(timestamp), nil

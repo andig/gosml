@@ -1,8 +1,6 @@
 package sml
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 func StatusParse(buf *Buffer) (int64, error) {
 	/*
@@ -57,7 +55,7 @@ func StatusParse(buf *Buffer) (int64, error) {
 
 		statusType = statusType | max
 	} else {
-		return 0, errors.Errorf("Unexpected type %02x (expected %02x)", typefield, TYPEUNSIGNED)
+		return 0, fmt.Errorf("Unexpected type %02x (expected %02x)", typefield, TYPEUNSIGNED)
 	}
 
 	return status8, nil

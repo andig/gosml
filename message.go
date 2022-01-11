@@ -1,9 +1,10 @@
 package sml
 
 import (
-//	"fmt"
+	//	"fmt"
 
-	"github.com/pkg/errors"
+	"errors"
+	"fmt"
 )
 
 const (
@@ -65,25 +66,25 @@ func MessageBodyParse(buf *Buffer) (MessageBody, error) {
 		body.Data, err = CloseResponseParse(buf)
 		return body, err
 	case MESSAGEGETPROFILEPACKREQUEST:
-		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILEPACKREQUEST")
+		return body, fmt.Errorf("Unimplemented message type MESSAGEGETPROFILEPACKREQUEST")
 		// msgBody->data = GetProfilePackRequestParse(buf);
 	case MESSAGEGETPROFILEPACKRESPONSE:
-		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILEPACKRESPONSE")
+		return body, fmt.Errorf("Unimplemented message type MESSAGEGETPROFILEPACKRESPONSE")
 		// msgBody->data = GetProfilePackResponseParse(buf);
 	case MESSAGEGETPROFILELISTREQUEST:
-		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILELISTREQUEST")
+		return body, fmt.Errorf("Unimplemented message type MESSAGEGETPROFILELISTREQUEST")
 		// msgBody->data = GetProfileListRequestParse(buf);
 	case MESSAGEGETPROFILELISTRESPONSE:
-		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROFILELISTRESPONSE")
+		return body, fmt.Errorf("Unimplemented message type MESSAGEGETPROFILELISTRESPONSE")
 		// msgBody->data = GetProfileListResponseParse(buf);
 	case MESSAGEGETPROCPARAMETERREQUEST:
-		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROCPARAMETERREQUEST")
+		return body, fmt.Errorf("Unimplemented message type MESSAGEGETPROCPARAMETERREQUEST")
 		// msgBody->data = GetProcParameterRequestParse(buf);
 	case MESSAGEGETPROCPARAMETERRESPONSE:
-		return body, errors.Errorf("Unimplemented message type MESSAGEGETPROCPARAMETERRESPONSE")
+		return body, fmt.Errorf("Unimplemented message type MESSAGEGETPROCPARAMETERRESPONSE")
 		// msgBody->data = GetProcParameterResponseParse(buf);
 	case MESSAGESETPROCPARAMETERREQUEST:
-		return body, errors.Errorf("Unimplemented message type MESSAGESETPROCPARAMETERREQUEST")
+		return body, fmt.Errorf("Unimplemented message type MESSAGESETPROCPARAMETERREQUEST")
 		// msgBody->data = SetProcParameterRequestParse(buf);
 	case MESSAGEGETLISTREQUEST:
 		body.Data, err = GetListRequestParse(buf)
@@ -92,11 +93,11 @@ func MessageBodyParse(buf *Buffer) (MessageBody, error) {
 		body.Data, err = GetListResponseParse(buf)
 		return body, err
 	case MESSAGEATTENTIONRESPONSE:
-		return body, errors.Errorf("Unimplemented message type MESSAGEATTENTIONRESPONSE")
+		return body, fmt.Errorf("Unimplemented message type MESSAGEATTENTIONRESPONSE")
 		// msgBody->data = AttentionResponseParse(buf);
 	}
 
-	return body, errors.Errorf("Invalid message type: % x", body.Tag)
+	return body, fmt.Errorf("Invalid message type: % x", body.Tag)
 }
 
 func MessageParse(buf *Buffer, validate ...bool) (Message, error) {
@@ -134,9 +135,9 @@ func MessageParse(buf *Buffer, validate ...bool) (Message, error) {
 	}
 
 	if len(validate) > 0 && validate[0] {
-//		fmt.Println(buf.Cursor)
+		//		fmt.Println(buf.Cursor)
 		crc := Crc16Calculate(buf.Bytes[crcStart:crcEnd], crcEnd-crcStart)
-//		fmt.Printf("%04x-%04x\n", crc, msg.Crc)
+		//		fmt.Printf("%04x-%04x\n", crc, msg.Crc)
 
 		if crc != msg.Crc {
 			err := errors.New("Crc error")

@@ -6,9 +6,8 @@ import (
 	"io"
 	"math"
 	"os"
-	"path/filepath"
 
-	"github.com/andig/gosml"
+	sml "github.com/andig/gosml"
 )
 
 const (
@@ -69,10 +68,7 @@ func check(e error) {
 }
 
 func main() {
-	files, err := filepath.Glob("/Users/andig/htdocs/libsml-testing/*.bin")
-	check(err)
-
-	for _, f := range files {
+	for _, f := range os.Args[1:] {
 		fmt.Println(f)
 
 		f, err := os.Open(f)

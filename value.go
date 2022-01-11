@@ -1,8 +1,6 @@
 package sml
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 type Value struct {
 	Typ         uint8
@@ -97,7 +95,7 @@ func ValueParse(buf *Buffer) (Value, error) {
 
 		value.Typ = value.Typ | uint8(max)
 	default:
-		return value, errors.Errorf("Unexpected type %02x", typefield)
+		return value, fmt.Errorf("Unexpected type %02x", typefield)
 	}
 
 	return value, nil

@@ -1,8 +1,6 @@
 package sml
 
-import (
-	"github.com/pkg/errors"
-)
+import "fmt"
 
 type OctetString []byte
 
@@ -19,7 +17,7 @@ func OctetStringParse(buf *Buffer) (OctetString, error) {
 
 	length := BufGetNextLength(buf)
 	if length < 0 {
-		return nil, errors.Errorf("Invalid octet string length %d", length)
+		return nil, fmt.Errorf("Invalid octet string length %d", length)
 	}
 
 	str := buf.Bytes[buf.Cursor : buf.Cursor+length]
