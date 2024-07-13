@@ -30,7 +30,7 @@ func Octet2Obis(o sml.OctetString) string {
 }
 
 func ListEntry2Float(entry sml.ListEntry) float64 {
-	scaler := 1
+	scaler := 0
 	if entry.Scaler != 0 {
 		scaler = int(entry.Scaler)
 	}
