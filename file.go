@@ -2,7 +2,7 @@ package sml
 
 func FileParse(bytes []byte) ([]Message, error) {
 	buf := &Buffer{}
-	buf.Bytes = make([]byte, MAXFILESIZE)
+	buf.Bytes = make([]byte, MaxFileSize)
 	copy(buf.Bytes, bytes)
 
 	messages := make([]Message, 0)
