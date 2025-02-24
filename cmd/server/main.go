@@ -17,7 +17,7 @@ const (
 func PrintMessage(msg sml.Message) {
 	list, ok := msg.MessageBody.Data.(sml.GetListResponse)
 	if !ok {
-		panic("Could not cast list reponse")
+		panic("Could not cast list response")
 	}
 
 	for _, elem := range list.ValList {
@@ -75,6 +75,10 @@ func main() {
 		check(err)
 
 		r := bufio.NewReader(f)
+
+		// If you set your smart meter to output "extended datasets", increase the
+		// file buffer size to 1024 bytes.
+		sml.MaxFileSize = 1024
 
 		for {
 			buf, err := sml.TransportRead(r)
